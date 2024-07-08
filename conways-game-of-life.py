@@ -69,16 +69,8 @@ def draw_game(game_arr, display_boundries):
         for j in range(len(game_arr[0])):
             if game_arr[i][j]:
                 draw_square(i, j, game_arr, display_boundries)
-                
-def change_grid(game_arr, mouse_x, mouse_y):
-    # Take mouse_x and mouse_y and scale them onto the game board
-    # Update that specific coordinate to inverse of what it is currently
-    
-    
-    '''
-    We have mouse x and mouse y in pixel coords
-    
-    '''
+
+def kill_or_reive_square(game_arr, mouse_x, mouse_y):
     square = game_arr[mouse_y//10][mouse_x//10]
     if square:
         game_arr[mouse_y//10][mouse_x//10] = 0
@@ -99,8 +91,8 @@ while running:
                     playing = True
                 else:
                     playing = False
-            else: # User has clicked on a square to be killed or alive
-                change_grid(game_arr, mouse_x, mouse_y)
+            else: # User has clicked on a square to be killed or revived
+                kill_or_reive_square(game_arr, mouse_x, mouse_y)
             
             
     screen.fill(BLACK)
