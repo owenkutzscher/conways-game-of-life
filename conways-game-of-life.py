@@ -11,7 +11,7 @@ pygame.init()
 info = pygame.display.Info()
 dim_x = info.current_w
 dim_y = info.current_h
-screen = pygame.display.set_mode((dim_x, dim_y))
+screen = pygame.display.set_mode((dim_y, dim_y))
 pygame.display.set_caption('Conway\'s Game of Life')
 
 # Colors
@@ -27,15 +27,16 @@ start_text = font.render("START", True, GREEN)
 stop_text = font.render("STOP", True, RED)
 
 # Game settings
-game_arr = np.zeros((100, 200)) # Initial game array
-game_arr[50][100:103] = 1 # Initial alive squares
-game_arr[51][101] = 1
+game_arr = np.zeros((dim_y//10, dim_y//10)) # Initial game array
+center = np.shape(game_arr)[0] // 2
+game_arr[center][center-1:center+2] = 1 # Initial alive squares
+game_arr[center+1][center] = 1
 origional_game_arr = np.copy(game_arr)
 
 
 # Game state and controls
 playing = False
-display_boundries = (dim_x, dim_y)
+display_boundries = (dim_y, dim_y)
 timer_interval = 1000  # 1000 milliseconds = 1 second
 previous_time = pygame.time.get_ticks()
 
@@ -74,8 +75,15 @@ def change_grid(game_arr, mouse_x, mouse_y):
     # Update that specific coordinate to inverse of what it is currently
     
     
-    return game_arr
-
+    '''
+    We have mouse x and mouse y in pixel coords
+    
+    '''
+    square = game_arr[mouse_y//10][mouse_x//10]
+    if square:
+        game_arr[mouse_y//10][mouse_x//10] = 0
+    else:
+        game_arr[mouse_y//10][mouse_x//10] = 1
 
 # Game loop
 running = True
@@ -92,7 +100,7 @@ while running:
                 else:
                     playing = False
             else: # User has clicked on a square to be killed or alive
-                game_arr = change_grid(game_arr, mouse_x, mouse_y)
+                change_grid(game_arr, mouse_x, mouse_y)
             
             
     screen.fill(BLACK)
