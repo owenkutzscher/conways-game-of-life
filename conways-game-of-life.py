@@ -39,7 +39,7 @@ origional_game_arr = np.copy(game_arr)
 playing = False
 display_boundries = (dim_y, dim_y)
 # Game speed
-timer_interval = 100  # 1000 milliseconds = 1 second
+timer_interval = 10  # 1000 milliseconds = 1 second
 previous_time = pygame.time.get_ticks()
 
 # Button and text coordinates
@@ -73,12 +73,12 @@ def darken_color(color, amount):
     b = max(0, b - amount)
     return (r, g, b)
     
-    
 def draw_game(game_arr, display_boundries):
     for i in range(len(game_arr)):
         for j in range(len(game_arr[0])):
             if game_arr[i][j]:
                 draw_square(i, j, game_arr, display_boundries, WHITE)
+                
                 
             else: # Add in fun color fx
                 square_found = False
@@ -91,7 +91,7 @@ def draw_game(game_arr, display_boundries):
                     if surrownding_squares.any() == 1:
                         square_found = True
                         draw_square(i, j, game_arr, display_boundries, darken_color(WHITE, f))
-                    elif f == 3:
+                    elif f == 3: # How far out are the visual fx
                         square_found = True
                         draw_square(i, j, game_arr, display_boundries, BLACK)
                         

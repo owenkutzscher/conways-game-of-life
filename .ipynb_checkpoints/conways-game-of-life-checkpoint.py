@@ -11,7 +11,7 @@ pygame.init()
 info = pygame.display.Info()
 dim_x = info.current_w
 dim_y = info.current_h
-screen = pygame.display.set_mode((dim_x, dim_y))
+screen = pygame.display.set_mode((dim_y, dim_y))
 pygame.display.set_caption('Conway\'s Game of Life')
 
 # Colors
@@ -19,6 +19,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+DARKBLUE = (0, 0 , 90)
 
 
 # Font and text
@@ -27,16 +28,18 @@ start_text = font.render("START", True, GREEN)
 stop_text = font.render("STOP", True, RED)
 
 # Game settings
-game_arr = np.zeros((100, 200)) # Initial game array
-game_arr[50][100:103] = 1 # Initial alive squares
-game_arr[51][101] = 1
+game_arr = np.zeros((dim_y//10, dim_y//10)) # Initial game array
+center = np.shape(game_arr)[0] // 2
+game_arr[center][center-1:center+2] = 1 # Initial alive squares
+game_arr[center+1][center] = 1
 origional_game_arr = np.copy(game_arr)
 
 
 # Game state and controls
 playing = False
-display_boundries = (dim_x, dim_y)
-timer_interval = 1000  # 1000 milliseconds = 1 second
+display_boundries = (dim_y, dim_y)
+# Game speed
+timer_interval = 10  # 1000 milliseconds = 1 second
 previous_time = pygame.time.get_ticks()
 
 # Button and text coordinates
@@ -49,7 +52,7 @@ start_stop_coords = (button_left, button_top+button_bottom)
 
     
     
-def draw_square(i, j, game_arr, display_boundries):
+def draw_square(i, j, game_arr, display_boundries, COLOR):
     boundry_x_len, boundry_y_len = display_boundries
     game_x_len = np.shape(game_arr)[1]
     game_y_len = np.shape(game_arr)[0]
@@ -60,22 +63,46 @@ def draw_square(i, j, game_arr, display_boundries):
     x = size_x * j
     y = size_y * i
     
-    pygame.draw.rect(screen, WHITE, (x, y, size_x, size_y))
+    pygame.draw.rect(screen, COLOR, (x, y, size_x, size_y))
     
+def darken_color(color, amount):
+    amount = 100*np.log(amount) + 100
+    r, g, b = color
+    r = max(0, r - amount)
+    g = max(0, g - amount)
+    b = max(0, b - amount)
+    return (r, g, b)
     
 def draw_game(game_arr, display_boundries):
     for i in range(len(game_arr)):
         for j in range(len(game_arr[0])):
             if game_arr[i][j]:
-                draw_square(i, j, game_arr, display_boundries)
+                draw_square(i, j, game_arr, display_boundries, WHITE)
                 
-def change_grid(game_arr, mouse_x, mouse_y):
-    # Take mouse_x and mouse_y and scale them onto the game board
-    # Update that specific coordinate to inverse of what it is currently
-    
-    
-    return game_arr
+                
+            else: # Add in fun color fx
+                square_found = False
+                f = 0
+                while not square_found:
+                    f += 1
+                    x_min, x_max = max(j-f, 0), min(j+1+f, dim_y)
+                    y_min, y_max = max(i-f, 0), min(i+1+f, dim_y)
+                    surrownding_squares = game_arr[y_min:y_max, x_min:x_max]
+                    if surrownding_squares.any() == 1:
+                        square_found = True
+                        draw_square(i, j, game_arr, display_boundries, darken_color(WHITE, f))
+                    elif f == 3: # How far out are the visual fx
+                        square_found = True
+                        draw_square(i, j, game_arr, display_boundries, BLACK)
+                        
+                
 
+def kill_or_reive_square(game_arr, mouse_x, mouse_y):
+    square = game_arr[mouse_y//10][mouse_x//10]
+    if square:
+        game_arr[mouse_y//10][mouse_x//10] = 0
+    else:
+        game_arr[mouse_y//10][mouse_x//10] = 1
 
 # Game loop
 running = True
@@ -91,8 +118,8 @@ while running:
                     playing = True
                 else:
                     playing = False
-            else: # User has clicked on a square to be killed or alive
-                game_arr = change_grid(game_arr, mouse_x, mouse_y)
+            else: # User has clicked on a square to be killed or revived
+                kill_or_reive_square(game_arr, mouse_x, mouse_y)
             
             
     screen.fill(BLACK)
